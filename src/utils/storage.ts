@@ -1,0 +1,43 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { JournalData, initialJournalData } from '../types/journal';
+
+const JOURNAL_KEY = '@radiant_journal';
+
+export const storageService = {
+  async saveJournal(data: JournalData): Promise<void> {
+    try {
+      await AsyncStorage.setItem(JOURNAL_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving journal:', error);
+      throw error;
+    }
+  },
+
+  async loadJournal(): Promise<JournalData> {
+    try {
+      const data = await AsyncStorage.getItem(JOURNAL_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        // Merge with initialJournalData to ensure all properties exist
+        return {
+          ...initialJournalData,
+          ...parsed,
+          visionBoards: parsed.visionBoards || initialJournalData.visionBoards,
+        };
+      }
+      return initialJournalData;
+    } catch (error) {
+      console.error('Error loading journal:', error);
+      return initialJournalData;
+    }
+  },
+
+  async clearJournal(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(JOURNAL_KEY);
+    } catch (error) {
+      console.error('Error clearing journal:', error);
+      throw error;
+    }
+  },
+};
