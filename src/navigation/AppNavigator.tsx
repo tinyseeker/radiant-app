@@ -15,6 +15,8 @@ import EditStandardsScreen from '../screens/EditStandardsScreen';
 import EditRemindersScreen from '../screens/EditRemindersScreen';
 import EditVisionBoardScreen from '../screens/EditVisionBoardScreen';
 import ViewJournalScreen from '../screens/ViewJournalScreen';
+import DailyCheckInScreen from '../screens/DailyCheckInScreen';
+import VisionBoardSlideshowScreen from '../screens/VisionBoardSlideshowScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -31,7 +33,6 @@ export default function AppNavigator() {
           headerTitleStyle: {
             fontWeight: '600',
           },
-          headerBackTitleVisible: false,
         }}
       >
         <Stack.Screen
@@ -93,6 +94,16 @@ export default function AppNavigator() {
           name="ViewJournal"
           component={ViewJournalScreen}
           options={{ title: 'My Journal' }}
+        />
+        <Stack.Screen
+          name="DailyCheckIn"
+          component={DailyCheckInScreen}
+          options={{ title: 'Daily Check-in' }}
+        />
+        <Stack.Screen
+          name="VisionBoardSlideshow"
+          component={VisionBoardSlideshowScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

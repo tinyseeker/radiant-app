@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { useActivity } from '../context/ActivityContext';
+import { ProgressCard } from '../components/ProgressCard';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -21,6 +23,8 @@ const journalSections = [
 ];
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { activity, hasCheckedInToday } = useActivity();
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -57,6 +61,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.viewButtonText}>View My Journal</Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        <View style={styles.progressCardContainer}>
+          <ProgressCard
+            streakData={activity.streakData}
+            checkIns={activity.checkIns}
+            hasCheckedInToday={hasCheckedInToday}
+            onPress={() => navigation.navigate('DailyCheckIn')}
+          />
+        </View>
 
         <View style={styles.sectionsContainer}>
           <Text style={styles.sectionHeader}>Journal Sections</Text>
@@ -156,6 +169,10 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.text.white,
     fontSize: 18,
+  },
+  progressCardContainer: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
   },
   sectionsContainer: {
     paddingHorizontal: spacing.lg,

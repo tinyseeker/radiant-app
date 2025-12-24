@@ -191,10 +191,19 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
       {/* Content */}
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
-          <Text style={styles.title}>
-            {categories.find(c => c.key === selectedCategory)?.title}
-          </Text>
-          <Text style={styles.count}>{currentImages.length} / {maxImages} images</Text>
+          <View>
+            <Text style={styles.title}>
+              {categories.find(c => c.key === selectedCategory)?.title}
+            </Text>
+            <Text style={styles.count}>{currentImages.length} / {maxImages} images</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.slideshowButton}
+            onPress={() => navigation.navigate('VisionBoardSlideshow')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.slideshowButtonText}>🎬 Slideshow</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Image Grid */}
@@ -336,6 +345,9 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.lg,
   },
   title: {
@@ -346,6 +358,22 @@ const styles = StyleSheet.create({
   count: {
     ...typography.caption,
     color: colors.text.tertiary,
+  },
+  slideshowButton: {
+    backgroundColor: colors.accent.info,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  slideshowButtonText: {
+    ...typography.button,
+    color: colors.text.white,
+    fontSize: 14,
   },
   grid: {
     flexDirection: 'row',
