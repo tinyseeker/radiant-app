@@ -33,6 +33,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </TouchableOpacity>
         <View style={styles.headerContent}>
           <View style={styles.logoSmall}>
             <Text style={styles.logoEmoji}>✨</Text>
@@ -114,6 +121,21 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     borderBottomLeftRadius: borderRadius.xl,
     borderBottomRightRadius: borderRadius.xl,
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: 60,
+    right: spacing.lg,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  settingsIcon: {
+    fontSize: 24,
   },
   headerContent: {
     alignItems: 'center',

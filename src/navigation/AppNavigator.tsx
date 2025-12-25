@@ -17,6 +17,7 @@ import EditVisionBoardScreen from '../screens/EditVisionBoardScreen';
 import ViewJournalScreen from '../screens/ViewJournalScreen';
 import DailyCheckInScreen from '../screens/DailyCheckInScreen';
 import VisionBoardSlideshowScreen from '../screens/VisionBoardSlideshowScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -104,6 +105,11 @@ export default function AppNavigator() {
           name="VisionBoardSlideshow"
           component={VisionBoardSlideshowScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: 'Settings' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { JournalProvider } from './src/context/JournalContext';
 import { ActivityProvider } from './src/context/ActivityContext';
+import { SettingsProvider } from './src/context/SettingsContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
@@ -10,8 +11,10 @@ export default function App() {
     <SafeAreaProvider>
       <JournalProvider>
         <ActivityProvider>
-          <AppNavigator />
-          <StatusBar style="auto" />
+          <SettingsProvider>
+            <AppNavigator />
+            <StatusBar style="auto" />
+          </SettingsProvider>
         </ActivityProvider>
       </JournalProvider>
     </SafeAreaProvider>

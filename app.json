@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Radiant needs access to your photo library to add images to your vision board.",
-        "NSCameraUsageDescription": "Radiant needs access to your camera to take photos for your vision board."
+        "NSCameraUsageDescription": "Radiant needs access to your camera to take photos for your vision board.",
+        "NSUserNotificationsUsageDescription": "Radiant sends daily reminders to help you maintain your gratitude practice and keep your streak alive."
       }
     },
     "android": {
@@ -27,11 +28,22 @@
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "POST_NOTIFICATIONS"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF9A76",
+          "sounds": []
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

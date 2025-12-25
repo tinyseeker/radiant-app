@@ -13,4 +13,5 @@ export type RootStackParamList = {
   ViewJournal: undefined;
   DailyCheckIn: undefined;
   VisionBoardSlideshow: undefined;
+  Settings: undefined;
 };
