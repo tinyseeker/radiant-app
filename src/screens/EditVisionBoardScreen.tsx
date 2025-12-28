@@ -30,6 +30,12 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
   const currentImages = journal.visionBoards[selectedCategory];
   const maxImages = 10;
 
+  // Calculate total images across all categories
+  const totalImages = Object.values(journal.visionBoards).reduce(
+    (sum, categoryImages) => sum + categoryImages.length,
+    0
+  );
+
   const pickImage = async () => {
     if (currentImages.length >= maxImages) {
       Alert.alert('Limit Reached', `You can add up to ${maxImages} images per category.`);
@@ -198,11 +204,14 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
             <Text style={styles.count}>{currentImages.length} / {maxImages} images</Text>
           </View>
           <TouchableOpacity
-            style={styles.slideshowButton}
-            onPress={() => navigation.navigate('VisionBoardSlideshow')}
-            activeOpacity={0.7}
+            style={[styles.slideshowButton, totalImages === 0 && styles.slideshowButtonDisabled]}
+            onPress={() => totalImages > 0 && navigation.navigate('VisionBoardSlideshow')}
+            activeOpacity={totalImages > 0 ? 0.7 : 1}
+            disabled={totalImages === 0}
           >
-            <Text style={styles.slideshowButtonText}>🎬 Slideshow</Text>
+            <Text style={[styles.slideshowButtonText, totalImages === 0 && styles.slideshowButtonTextDisabled]}>
+              🎬 Slideshow
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -374,6 +383,13 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.text.white,
     fontSize: 14,
+  },
+  slideshowButtonDisabled: {
+    backgroundColor: colors.backgroundDark,
+    opacity: 0.5,
+  },
+  slideshowButtonTextDisabled: {
+    color: colors.text.tertiary,
   },
   grid: {
     flexDirection: 'row',
