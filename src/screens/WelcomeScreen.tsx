@@ -4,16 +4,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { useJournal } from '../context/JournalContext';
 
 type WelcomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Welcome'>;
 };
 
 export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
+  const { journal } = useJournal();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
+    // If user has completed onboarding, skip to Home
+    if (journal.hasCompletedOnboarding) {
+      navigation.replace('Home');
+      return;
+    }
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -27,7 +35,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [journal.hasCompletedOnboarding]);
 
   return (
     <LinearGradient

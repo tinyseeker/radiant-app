@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { useJournal } from '../context/JournalContext';
 
 type OnboardingScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Onboarding'>;
@@ -25,6 +26,7 @@ const onboardingSteps = [
 ];
 
 export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+  const { updateJournal } = useJournal();
   const [currentStep, setCurrentStep] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -48,16 +50,21 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
     ]).start();
   }, [currentStep]);
 
+  const completeOnboarding = async () => {
+    await updateJournal({ hasCompletedOnboarding: true });
+    navigation.replace('Home');
+  };
+
   const handleNext = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      navigation.navigate('Home');
+      completeOnboarding();
     }
   };
 
   const handleSkip = () => {
-    navigation.navigate('Home');
+    completeOnboarding();
   };
 
   const step = onboardingSteps[currentStep];

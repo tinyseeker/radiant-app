@@ -23,6 +23,7 @@ export interface VisionBoards {
 }
 
 export interface JournalData {
+  hasCompletedOnboarding: boolean;
   affirmations: string[];
   morningRoutine: string;
   eveningRoutine: string;
@@ -34,6 +35,7 @@ export interface JournalData {
 }
 
 export const initialJournalData: JournalData = {
+  hasCompletedOnboarding: false,
   affirmations: [],
   morningRoutine: '',
   eveningRoutine: '',
