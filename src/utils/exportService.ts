@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 import { JournalData } from '../types/journal';
 import { UserActivity } from '../types/activity';
@@ -33,14 +33,16 @@ export const exportService = {
 
       const jsonString = JSON.stringify(exportData, null, 2);
       const filename = `radiant-backup-${Date.now()}.json`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
 
-      await FileSystem.writeAsStringAsync(fileUri, jsonString);
+      // Use new File System API
+      const file = new File(Paths.cache, filename);
+      await file.create();
+      await file.write(jsonString);
 
       // Check if sharing is available
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
-        await Sharing.shareAsync(fileUri, {
+        await Sharing.shareAsync(file.uri, {
           mimeType: 'application/json',
           dialogTitle: 'Save Radiant Backup',
           UTI: 'public.json',
@@ -48,6 +50,9 @@ export const exportService = {
       } else {
         throw new Error('Sharing is not available on this device');
       }
+
+      // Clean up temporary file after sharing
+      await file.delete();
     } catch (error) {
       console.error('Error exporting JSON:', error);
       throw error;
@@ -67,19 +72,24 @@ export const exportService = {
       const htmlContent = this.generateHTMLContent(journalData, activityData);
 
       const filename = `radiant-journal-${Date.now()}.html`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
 
-      await FileSystem.writeAsStringAsync(fileUri, htmlContent);
+      // Use new File System API
+      const file = new File(Paths.cache, filename);
+      await file.create();
+      await file.write(htmlContent);
 
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
-        await Sharing.shareAsync(fileUri, {
+        await Sharing.shareAsync(file.uri, {
           mimeType: 'text/html',
           dialogTitle: 'Save Radiant Journal',
         });
       } else {
         throw new Error('Sharing is not available on this device');
       }
+
+      // Clean up temporary file after sharing
+      await file.delete();
     } catch (error) {
       console.error('Error exporting PDF:', error);
       throw error;
