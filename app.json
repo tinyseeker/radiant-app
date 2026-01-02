@@ -69,6 +69,21 @@
           "color": "#FF9A76",
           "sounds": []
         }
+      ],
+      [
+        "react-native-widget-extension",
+        {
+          "widgets": [
+            {
+              "name": "RadiantAffirmation",
+              "displayName": "Daily Affirmation",
+              "description": "See your daily affirmation and current streak",
+              "families": ["small", "medium"],
+              "backgroundColor": "#FFF9F5"
+            }
+          ],
+          "deploymentTarget": "14.0"
+        }
       ]
     ],
     "web": {
