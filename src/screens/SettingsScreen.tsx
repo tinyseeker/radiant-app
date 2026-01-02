@@ -119,9 +119,11 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         'Export Successful',
         'Your journal has been exported as HTML. You can open it in any browser or convert to PDF.'
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export PDF error:', error);
-      Alert.alert('Export Failed', 'Unable to export your journal. Please try again.');
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
+      Alert.alert('Export Failed', `Unable to export your journal. Error: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsExportingPDF(false);
     }

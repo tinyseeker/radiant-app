@@ -3,6 +3,18 @@ import * as Sharing from 'expo-sharing';
 import { JournalData } from '../types/journal';
 import { UserActivity } from '../types/activity';
 
+// Helper function to escape HTML special characters
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 export const exportService = {
   /**
    * Export all journal data as JSON file
@@ -81,8 +93,9 @@ export const exportService = {
     journalData: JournalData,
     activityData: UserActivity
   ): string {
-    // Convert check-ins to array and sort by date
-    const checkInDates = Object.keys(activityData.checkIns).sort().reverse();
+    try {
+      // Convert check-ins to array and sort by date
+      const checkInDates = Object.keys(activityData.checkIns).sort().reverse();
 
     return `
 <!DOCTYPE html>
@@ -201,17 +214,17 @@ export const exportService = {
   ${journalData.affirmations.length > 0 ? `
   <div class="section">
     <h2>💫 My Affirmations</h2>
-    ${journalData.affirmations.map((aff) => `<div class="affirmation">${aff}</div>`).join('')}
+    ${journalData.affirmations.map((aff) => `<div class="affirmation">${escapeHtml(aff)}</div>`).join('')}
   </div>
   ` : ''}
 
   ${journalData.goals.wealth || journalData.goals.business || journalData.goals.healthFitness || journalData.goals.personalBehavior ? `
   <div class="section">
     <h2>🎯 My Goals</h2>
-    ${journalData.goals.wealth ? `<div class="goal"><span class="goal-label">Wealth & Abundance:</span> ${journalData.goals.wealth}</div>` : ''}
-    ${journalData.goals.business ? `<div class="goal"><span class="goal-label">Business & Career:</span> ${journalData.goals.business}</div>` : ''}
-    ${journalData.goals.healthFitness ? `<div class="goal"><span class="goal-label">Health & Fitness:</span> ${journalData.goals.healthFitness}</div>` : ''}
-    ${journalData.goals.personalBehavior ? `<div class="goal"><span class="goal-label">Personal Growth:</span> ${journalData.goals.personalBehavior}</div>` : ''}
+    ${journalData.goals.wealth ? `<div class="goal"><span class="goal-label">Wealth & Abundance:</span> ${escapeHtml(journalData.goals.wealth)}</div>` : ''}
+    ${journalData.goals.business ? `<div class="goal"><span class="goal-label">Business & Career:</span> ${escapeHtml(journalData.goals.business)}</div>` : ''}
+    ${journalData.goals.healthFitness ? `<div class="goal"><span class="goal-label">Health & Fitness:</span> ${escapeHtml(journalData.goals.healthFitness)}</div>` : ''}
+    ${journalData.goals.personalBehavior ? `<div class="goal"><span class="goal-label">Personal Growth:</span> ${escapeHtml(journalData.goals.personalBehavior)}</div>` : ''}
   </div>
   ` : ''}
 
@@ -219,7 +232,7 @@ export const exportService = {
   <div class="section">
     <h2>🌟 Who I'm Becoming</h2>
     <ul>
-      ${journalData.traits.map((trait) => `<li>${trait}</li>`).join('')}
+      ${journalData.traits.map((trait) => `<li>${escapeHtml(trait)}</li>`).join('')}
     </ul>
   </div>
   ` : ''}
@@ -228,7 +241,7 @@ export const exportService = {
   <div class="section">
     <h2>⚡ My Standards</h2>
     <ul>
-      ${journalData.standards.map((standard) => `<li>${standard}</li>`).join('')}
+      ${journalData.standards.map((standard) => `<li>${escapeHtml(standard)}</li>`).join('')}
     </ul>
   </div>
   ` : ''}
@@ -236,14 +249,14 @@ export const exportService = {
   ${journalData.morningRoutine ? `
   <div class="section">
     <h2>🌅 Morning Routine</h2>
-    <p>${journalData.morningRoutine}</p>
+    <p>${escapeHtml(journalData.morningRoutine)}</p>
   </div>
   ` : ''}
 
   ${journalData.eveningRoutine ? `
   <div class="section">
     <h2>🌙 Evening Routine</h2>
-    <p>${journalData.eveningRoutine}</p>
+    <p>${escapeHtml(journalData.eveningRoutine)}</p>
   </div>
   ` : ''}
 
@@ -283,6 +296,10 @@ export const exportService = {
 </body>
 </html>
     `.trim();
+    } catch (error) {
+      console.error('Error generating HTML:', error);
+      throw new Error(`Failed to generate HTML: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   },
 
   /**
