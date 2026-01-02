@@ -15,7 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useSettings } from '../context/SettingsContext';
 import { useJournal } from '../context/JournalContext';
-import { useJournalEntries } from '../context/JournalEntriesContext';
+import { useActivity } from '../context/ActivityContext';
 import { exportService } from '../utils/exportService';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
 
@@ -27,7 +27,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { settings, updateSettings, enableNotifications, disableNotifications, testNotification } =
     useSettings();
   const { journal } = useJournal();
-  const { entries } = useJournalEntries();
+  const { activity } = useActivity();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isExportingJSON, setIsExportingJSON] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
@@ -98,7 +98,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const handleExportJSON = async () => {
     try {
       setIsExportingJSON(true);
-      await exportService.exportAsJSON(journal, entries);
+      await exportService.exportAsJSON(journal, activity);
       Alert.alert(
         'Export Successful',
         'Your journal data has been exported as JSON. You can import this file later to restore your data.'
@@ -114,7 +114,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const handleExportPDF = async () => {
     try {
       setIsExportingPDF(true);
-      await exportService.exportAsPDF(journal, entries);
+      await exportService.exportAsPDF(journal, activity);
       Alert.alert(
         'Export Successful',
         'Your journal has been exported as HTML. You can open it in any browser or convert to PDF.'
