@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useSettings } from '../context/SettingsContext';
+import { useJournal } from '../context/JournalContext';
+import { useJournalEntries } from '../context/JournalEntriesContext';
+import { exportService } from '../utils/exportService';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
 
 type SettingsScreenProps = {
@@ -22,7 +26,11 @@ type SettingsScreenProps = {
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { settings, updateSettings, enableNotifications, disableNotifications, testNotification } =
     useSettings();
+  const { journal } = useJournal();
+  const { entries } = useJournalEntries();
   const [isEnabling, setIsEnabling] = useState(false);
+  const [isExportingJSON, setIsExportingJSON] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   const handleToggleNotifications = async (value: boolean) => {
     if (value) {
@@ -84,6 +92,38 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       Alert.alert('Success!', 'Check your notifications - a test notification was sent!');
     } catch (error) {
       Alert.alert('Error', 'Failed to send test notification. Please check permissions.');
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try {
+      setIsExportingJSON(true);
+      await exportService.exportAsJSON(journal, entries);
+      Alert.alert(
+        'Export Successful',
+        'Your journal data has been exported as JSON. You can import this file later to restore your data.'
+      );
+    } catch (error) {
+      console.error('Export JSON error:', error);
+      Alert.alert('Export Failed', 'Unable to export your data. Please try again.');
+    } finally {
+      setIsExportingJSON(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExportingPDF(true);
+      await exportService.exportAsPDF(journal, entries);
+      Alert.alert(
+        'Export Successful',
+        'Your journal has been exported as HTML. You can open it in any browser or convert to PDF.'
+      );
+    } catch (error) {
+      console.error('Export PDF error:', error);
+      Alert.alert('Export Failed', 'Unable to export your journal. Please try again.');
+    } finally {
+      setIsExportingPDF(false);
     }
   };
 
@@ -263,6 +303,79 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         )}
       </View>
 
+      {/* Data Management Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Data Management</Text>
+
+        <View style={styles.settingInfo}>
+          <Text style={styles.settingDescription}>
+            Export your journal data for backup or to view outside the app.
+          </Text>
+        </View>
+
+        {/* Export as JSON (Backup) */}
+        <TouchableOpacity
+          style={styles.exportButton}
+          onPress={handleExportJSON}
+          disabled={isExportingJSON}
+        >
+          <LinearGradient
+            colors={colors.gradients.secondary}
+            style={styles.exportButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            {isExportingJSON ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text style={styles.exportButtonIcon}>💾</Text>
+                <View style={styles.exportButtonContent}>
+                  <Text style={styles.exportButtonTitle}>Export as Backup</Text>
+                  <Text style={styles.exportButtonSubtitle}>
+                    Save all data as JSON (can be restored later)
+                  </Text>
+                </View>
+              </>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Export as PDF/HTML */}
+        <TouchableOpacity
+          style={styles.exportButton}
+          onPress={handleExportPDF}
+          disabled={isExportingPDF}
+        >
+          <LinearGradient
+            colors={colors.gradients.primary}
+            style={styles.exportButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            {isExportingPDF ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text style={styles.exportButtonIcon}>📄</Text>
+                <View style={styles.exportButtonContent}>
+                  <Text style={styles.exportButtonTitle}>Export as Journal</Text>
+                  <Text style={styles.exportButtonSubtitle}>
+                    Beautiful HTML format (printable & shareable)
+                  </Text>
+                </View>
+              </>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <View style={styles.exportNote}>
+          <Text style={styles.exportNoteText}>
+            💡 Tip: Export regularly to keep a backup of your journey
+          </Text>
+        </View>
+      </View>
+
       {/* Info Note */}
       <View style={styles.infoBox}>
         <Text style={styles.infoIcon}>ℹ️</Text>
@@ -392,6 +505,53 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.text.white,
     fontSize: 16,
+  },
+  exportButton: {
+    marginTop: spacing.md,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  exportButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    minHeight: 80,
+  },
+  exportButtonIcon: {
+    fontSize: 32,
+    marginRight: spacing.md,
+  },
+  exportButtonContent: {
+    flex: 1,
+  },
+  exportButtonTitle: {
+    ...typography.button,
+    color: colors.text.white,
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  exportButtonSubtitle: {
+    ...typography.caption,
+    color: colors.text.white,
+    opacity: 0.9,
+    fontSize: 12,
+  },
+  exportNote: {
+    marginTop: spacing.md,
+    padding: spacing.sm,
+    backgroundColor: colors.backgroundDark,
+    borderRadius: borderRadius.md,
+  },
+  exportNoteText: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   infoBox: {
     flexDirection: 'row',
