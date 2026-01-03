@@ -14,7 +14,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { useActivity } from '../context/ActivityContext';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { StreakBadge } from '../components/StreakBadge';
 import { VisionBoardImage } from '../types/journal';
 import { isMilestone } from '../utils/streakCalculator';
@@ -24,6 +25,7 @@ type DailyCheckInScreenProps = {
 };
 
 export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenProps) {
+  const { colors } = useTheme();
   const { journal } = useJournal();
   const { activity, checkIn, hasCheckedInToday } = useActivity();
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -128,6 +130,7 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
   };
 
   const visionImages = getRandomVisionBoardImages();
+  const styles = createStyles(colors);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -238,7 +241,7 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

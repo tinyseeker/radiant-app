@@ -5,7 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { VisionBoardCategory, VisionBoardImage } from '../types/journal';
 
 type EditVisionBoardScreenProps = {
@@ -21,6 +22,7 @@ const categories: { key: VisionBoardCategory; title: string; icon: string; color
 ];
 
 export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScreenProps) {
+  const { colors } = useTheme();
   const { journal, updateJournal } = useJournal();
   const [selectedCategory, setSelectedCategory] = useState<VisionBoardCategory>('roleModels');
   const [labelModalVisible, setLabelModalVisible] = useState(false);
@@ -160,6 +162,8 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
+
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.container}>
@@ -313,7 +317,7 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

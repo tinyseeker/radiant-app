@@ -12,7 +12,8 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
-import { colors, spacing } from '../theme/colors';
+import { spacing } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { VisionBoardImage } from '../types/journal';
 
 type VisionBoardSlideshowScreenProps = {
@@ -22,6 +23,7 @@ type VisionBoardSlideshowScreenProps = {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function VisionBoardSlideshowScreen({ navigation }: VisionBoardSlideshowScreenProps) {
+  const { colors } = useTheme();
   const { journal } = useJournal();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -76,6 +78,8 @@ export default function VisionBoardSlideshowScreen({ navigation }: VisionBoardSl
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
   }).current;
+
+  const styles = createStyles(colors);
 
   const renderItem = ({ item }: { item: VisionBoardImage }) => (
     <View style={styles.imageSlide}>
@@ -166,7 +170,7 @@ export default function VisionBoardSlideshowScreen({ navigation }: VisionBoardSl
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',

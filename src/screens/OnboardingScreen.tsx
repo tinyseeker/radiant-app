@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from '
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { useJournal } from '../context/JournalContext';
 
 type OnboardingScreenProps = {
@@ -26,6 +27,7 @@ const onboardingSteps = [
 ];
 
 export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+  const { colors } = useTheme();
   const { updateJournal } = useJournal();
   const [currentStep, setCurrentStep] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -68,6 +70,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
   };
 
   const step = onboardingSteps[currentStep];
+  const styles = createStyles(colors);
 
   return (
     <LinearGradient
@@ -142,7 +145,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
   },
