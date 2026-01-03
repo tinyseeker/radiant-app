@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
 import { StreakData } from '../types/activity';
 import { getInsightMessage, formatCheckInTime, getMonthlyCompletionRate } from '../utils/streakCalculator';
+import { useTheme } from '../hooks/useTheme';
 
 interface ProgressCardProps {
   streakData: StreakData;
@@ -19,6 +20,7 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
   onPress,
 }) => {
   const { currentStreak, longestStreak, totalCheckIns, lastCheckInDate } = streakData;
+  const { colors } = useTheme();
 
   const getLastCheckInText = (): string => {
     if (!lastCheckInDate) {
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.h3,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 20,
   },
   icon: {
@@ -156,14 +158,14 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     ...typography.body,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 15,
     flex: 1,
     opacity: 0.9,
   },
   statValue: {
     ...typography.body,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   },
   insightText: {
     ...typography.body,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     ...typography.button,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 16,
     textAlign: 'center',
     fontWeight: '600',

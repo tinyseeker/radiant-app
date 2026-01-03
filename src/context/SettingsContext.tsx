@@ -11,6 +11,7 @@ interface SettingsContextType {
   enableNotifications: () => Promise<boolean>;
   disableNotifications: () => Promise<void>;
   testNotification: () => Promise<void>;
+  toggleDarkMode: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -131,6 +132,17 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const toggleDarkMode = async () => {
+    try {
+      await updateSettings({
+        darkMode: !settings.darkMode,
+      });
+    } catch (error) {
+      console.error('Failed to toggle dark mode:', error);
+      throw error;
+    }
+  };
+
   return (
     <SettingsContext.Provider
       value={{
@@ -139,6 +151,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         enableNotifications,
         disableNotifications,
         testNotification,
+        toggleDarkMode,
         isLoading,
       }}
     >

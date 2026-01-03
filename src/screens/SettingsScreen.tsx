@@ -17,17 +17,19 @@ import { useSettings } from '../context/SettingsContext';
 import { useJournal } from '../context/JournalContext';
 import { useActivity } from '../context/ActivityContext';
 import { exportService } from '../utils/exportService';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
+import { useTheme } from '../hooks/useTheme';
 
 type SettingsScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Settings'>;
 };
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
-  const { settings, updateSettings, enableNotifications, disableNotifications, testNotification } =
+  const { settings, updateSettings, enableNotifications, disableNotifications, testNotification, toggleDarkMode } =
     useSettings();
   const { journal } = useJournal();
   const { activity } = useActivity();
+  const { colors } = useTheme();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isExportingJSON, setIsExportingJSON] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
@@ -100,8 +102,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       setIsExportingJSON(true);
       await exportService.exportAsJSON(journal, activity);
       Alert.alert(
-        'Export Successful',
-        'Your journal data has been exported as JSON. You can import this file later to restore your data.'
+        'Ready to Save',
+        'Your backup file is ready! Choose where to save it using the share menu that appeared. You can import this file later to restore your data.'
       );
     } catch (error) {
       console.error('Export JSON error:', error);
@@ -116,8 +118,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       setIsExportingPDF(true);
       await exportService.exportAsPDF(journal, activity);
       Alert.alert(
-        'Export Successful',
-        'Your journal has been exported as HTML. You can open it in any browser or convert to PDF.'
+        'Ready to Save',
+        'Your journal is ready! Choose where to save it using the share menu that appeared. You can open it in any browser or convert to PDF.'
       );
     } catch (error: any) {
       console.error('Export PDF error:', error);
@@ -148,6 +150,8 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     ],
   };
 
+  const styles = createStyles(colors);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Header */}
@@ -160,6 +164,26 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         <Text style={styles.headerTitle}>Settings</Text>
         <Text style={styles.headerSubtitle}>Manage your notifications and preferences</Text>
       </LinearGradient>
+
+      {/* Appearance Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Appearance</Text>
+
+        <View style={styles.settingRow}>
+          <View style={styles.settingInfo}>
+            <Text style={styles.settingLabel}>Dark Mode</Text>
+            <Text style={styles.settingDescription}>
+              Switch between light and dark theme
+            </Text>
+          </View>
+          <Switch
+            value={settings.darkMode}
+            onValueChange={toggleDarkMode}
+            trackColor={{ false: '#D0D0D0', true: colors.primary }}
+            thumbColor={settings.darkMode ? colors.primaryDark : '#F4F4F4'}
+          />
+        </View>
+      </View>
 
       {/* Notifications Section */}
       <View style={styles.section}>
@@ -391,7 +415,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -434,7 +458,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     marginBottom: spacing.sm,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -493,7 +517,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -512,7 +536,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -557,7 +581,7 @@ const styles = StyleSheet.create({
   },
   infoBox: {
     flexDirection: 'row',
-    backgroundColor: '#E3F2FD',
+    backgroundColor: colors.backgroundLight,
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginHorizontal: spacing.lg,
@@ -569,7 +593,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     ...typography.caption,
-    color: '#1976D2',
+    color: colors.primary,
     flex: 1,
     lineHeight: 20,
   },

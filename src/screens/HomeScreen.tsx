@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
 import { useActivity } from '../context/ActivityContext';
 import { ProgressCard } from '../components/ProgressCard';
+import { useTheme } from '../hooks/useTheme';
 
 type HomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
@@ -24,6 +25,8 @@ const journalSections = [
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { activity, hasCheckedInToday } = useActivity();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.container}>
@@ -111,7 +114,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

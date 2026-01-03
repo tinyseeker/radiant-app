@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
 import { useJournal } from '../context/JournalContext';
+import { useTheme } from '../hooks/useTheme';
 
 type WelcomeScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Welcome'>;
@@ -12,8 +13,10 @@ type WelcomeScreenProps = {
 
 export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   const { journal } = useJournal();
+  const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+  const styles = createStyles(colors);
 
   useEffect(() => {
     // If user has completed onboarding, skip to Home
@@ -90,7 +93,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacing.lg,

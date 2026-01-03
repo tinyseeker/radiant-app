@@ -9,6 +9,7 @@ export interface NotificationSettings {
 
 export interface AppSettings {
   notifications: NotificationSettings;
+  darkMode: boolean;
 }
 
 export const initialAppSettings: AppSettings = {
@@ -20,4 +21,5 @@ export const initialAppSettings: AppSettings = {
     eveningEnabled: true,
     streakProtectionEnabled: true,
   },
+  darkMode: false,
 };
