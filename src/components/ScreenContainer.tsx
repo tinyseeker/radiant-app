@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing } from '../theme/colors';
+import { spacing } from '../theme/colors';
+import { useTheme } from '../hooks/useTheme';
 
 interface ScreenContainerProps {
   children: React.ReactNode;
@@ -9,6 +10,9 @@ interface ScreenContainerProps {
 }
 
 export default function ScreenContainer({ children, hasGradient = false }: ScreenContainerProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   if (hasGradient) {
     return (
       <LinearGradient
@@ -39,9 +43,10 @@ export default function ScreenContainer({ children, hasGradient = false }: Scree
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { spacing, borderRadius, typography } from '../theme/colors';
+import { useTheme } from '../hooks/useTheme';
 
 interface GradientButtonProps {
   title: string;
@@ -11,13 +12,14 @@ interface GradientButtonProps {
 }
 
 export default function GradientButton({ title, onPress, variant = 'primary', style }: GradientButtonProps) {
+  const { colors } = useTheme();
   const gradientColors = variant === 'primary' ? colors.gradients.primary : colors.gradients.secondary;
 
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={style}>
       <LinearGradient
         colors={gradientColors}
-        style={styles.button}
+        style={[styles.button, { shadowColor: colors.primary }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
@@ -33,7 +35,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.round,
     alignItems: 'center',
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     ...typography.button,
-    color: colors.text.white,
+    color: '#FFFFFF',
     fontSize: 18,
   },
 });
