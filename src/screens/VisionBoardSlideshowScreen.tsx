@@ -13,7 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { spacing } from '../theme/colors';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { VisionBoardImage } from '../types/journal';
 
 type VisionBoardSlideshowScreenProps = {

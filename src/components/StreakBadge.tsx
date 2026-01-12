@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, borderRadius } from '../theme/colors';
 
 interface StreakBadgeProps {
   streak: number;
@@ -39,9 +40,11 @@ export const StreakBadge: React.FC<StreakBadgeProps> = ({ streak, size = 'medium
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <Text style={[styles.emoji, { fontSize: currentSize.emoji }]}>
-        {streak > 0 ? '🔥' : '💤'}
-      </Text>
+      <Ionicons
+        name={streak > 0 ? 'flame' : 'moon'}
+        size={currentSize.emoji}
+        color="#FFFFFF"
+      />
       <Text style={[styles.number, { fontSize: currentSize.number }]}>{streak}</Text>
       <Text style={[styles.label, { fontSize: currentSize.label }]}>
         {streak === 1 ? 'day' : 'days'}
@@ -61,13 +64,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  emoji: {
-    marginBottom: spacing.xs,
-  },
   number: {
     color: colors.text.white,
     fontWeight: 'bold',
-    marginBottom: 2,
+    marginTop: 2,
+    marginBottom: 0,
   },
   label: {
     color: colors.text.white,

@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { VisionBoardCategory } from '../types/journal';
+import { useTheme } from '../hooks/useTheme';
 
 type ViewJournalScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'ViewJournal'>;
@@ -11,6 +12,8 @@ type ViewJournalScreenProps = {
 
 export default function ViewJournalScreen({ navigation }: ViewJournalScreenProps) {
   const { journal } = useJournal();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -201,29 +204,29 @@ export default function ViewJournalScreen({ navigation }: ViewJournalScreenProps
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF9F5',
+    backgroundColor: colors.background,
   },
   contentContainer: {
     paddingHorizontal: 24,
     paddingTop: 30,
-    paddingBottom: 60,
+    paddingBottom: 120,
   },
   mainTitle: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#2C3E50',
+    color: colors.text.primary,
     marginBottom: 30,
     textAlign: 'center',
   },
   section: {
     marginBottom: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -237,12 +240,12 @@ const styles = StyleSheet.create({
   },
   bodyText: {
     fontSize: 16,
-    color: '#34495E',
+    color: colors.text.primary,
     lineHeight: 24,
   },
   listItem: {
     fontSize: 16,
-    color: '#34495E',
+    color: colors.text.primary,
     lineHeight: 26,
     marginBottom: 8,
   },
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
   goalLabel: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#5D6D7E',
+    color: colors.text.secondary,
     marginBottom: 6,
   },
   emptyState: {
@@ -263,12 +266,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#95A5A6',
+    color: colors.text.tertiary,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: '#BDC3C7',
+    color: colors.text.tertiary,
   },
   visionBoardCategory: {
     marginBottom: 24,
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
   visionBoardLabel: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#5D6D7E',
+    color: colors.text.secondary,
     marginBottom: 12,
   },
   imageGrid: {

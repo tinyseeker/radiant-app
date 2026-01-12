@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, TextInput, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { spacing, borderRadius, typography } from '../theme/colors';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { VisionBoardCategory, VisionBoardImage } from '../types/journal';
 
 type EditVisionBoardScreenProps = {
@@ -166,9 +167,14 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
   const styles = createStyles(colors);
 
   return (
-    <View style={styles.container}>
-      {/* Category Tabs */}
-      <ScrollView
+    <View style={styles.screenOverlay}>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+
+        {/* Category Tabs */}
+        <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.tabsContainer}
@@ -313,22 +319,45 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
           </View>
         </View>
       </Modal>
+      </View>
     </View>
   );
 }
 
 const createStyles = (colors: any) => StyleSheet.create({
+  screenOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: 80,
+    overflow: 'hidden',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 24,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 20,
   },
   tabsContainer: {
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundDark,
+    marginTop: 70,
   },
   tabsContent: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
   tab: {
     flexDirection: 'row',
@@ -355,13 +384,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: 3,
+    paddingBottom: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   title: {
     ...typography.h2,

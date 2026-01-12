@@ -1,6 +1,8 @@
 export type RootStackParamList = {
+  Splash: undefined;
   Welcome: undefined;
   Onboarding: undefined;
+  MainTabs: undefined;
   Home: undefined;
   EditAffirmations: undefined;
   EditMorningRoutine: undefined;

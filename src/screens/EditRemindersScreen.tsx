@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
+import { useTheme } from '../hooks/useTheme';
+import { EmptyState } from '../components/EmptyState';
 
 type EditRemindersScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'EditReminders'>;
@@ -10,8 +13,10 @@ type EditRemindersScreenProps = {
 
 export default function EditRemindersScreen({ navigation }: EditRemindersScreenProps) {
   const { journal, updateJournal } = useJournal();
+  const { colors } = useTheme();
   const [reminders, setReminders] = useState<string[]>(journal.dailyReminders);
   const [newReminder, setNewReminder] = useState('');
+  const styles = createStyles(colors);
 
   const addReminder = () => {
     if (newReminder.trim()) {
@@ -39,9 +44,13 @@ export default function EditRemindersScreen({ navigation }: EditRemindersScreenP
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content}>
-        <Text style={styles.title}>Daily Reminders</Text>
+    <View style={styles.modalOverlay}>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <ScrollView style={styles.content}>
+          <Text style={styles.title}>Daily Reminders</Text>
         <Text style={styles.description}>
           Set up to 10 reminders of who you're becoming and what matters most.
         </Text>
@@ -62,45 +71,70 @@ export default function EditRemindersScreen({ navigation }: EditRemindersScreenP
         <Text style={styles.countText}>{reminders.length} / 10 reminders</Text>
 
         <View style={styles.listContainer}>
-          {reminders.map((reminder, index) => (
-            <View key={index} style={styles.reminderCard}>
-              <Text style={styles.reminderText}>{reminder}</Text>
-              <TouchableOpacity onPress={() => removeReminder(index)}>
-                <Text style={styles.removeText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+          {reminders.length === 0 ? (
+            <EmptyState message="No reminders yet. Add your first one above!" />
+          ) : (
+            reminders.map((reminder, index) => (
+              <View key={index} style={styles.reminderCard}>
+                <Text style={styles.reminderText}>{reminder}</Text>
+                <TouchableOpacity onPress={() => removeReminder(index)}>
+                  <Text style={styles.removeText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
         </View>
-      </ScrollView>
+        </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#FFF9F5',
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: 80,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 24,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 20,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 70,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#2C3E50',
+    color: colors.text.primary,
     marginBottom: 12,
   },
   description: {
     fontSize: 15,
-    color: '#7F8C8D',
+    color: colors.text.secondary,
     lineHeight: 22,
     marginBottom: 24,
   },
@@ -110,11 +144,11 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    color: '#2C3E50',
+    color: colors.text.primary,
     marginRight: 8,
     minHeight: 50,
   },
@@ -131,21 +165,21 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontSize: 14,
-    color: '#95A5A6',
+    color: colors.text.tertiary,
     marginBottom: 16,
   },
   listContainer: {
     paddingBottom: 100,
   },
   reminderCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.backgroundLight,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -154,7 +188,7 @@ const styles = StyleSheet.create({
   reminderText: {
     flex: 1,
     fontSize: 16,
-    color: '#34495E',
+    color: colors.text.primary,
     lineHeight: 22,
   },
   removeText: {
@@ -164,7 +198,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 24,
-    backgroundColor: '#FFF9F5',
+    paddingBottom: 32,
+    backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { spacing, borderRadius, typography } from '../theme/colors';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { useJournal } from '../context/JournalContext';
 
 type OnboardingScreenProps = {
@@ -54,7 +54,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
 
   const completeOnboarding = async () => {
     await updateJournal({ hasCompletedOnboarding: true });
-    navigation.replace('Home');
+    navigation.replace('MainTabs');
   };
 
   const handleNext = () => {

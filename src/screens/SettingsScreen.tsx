@@ -421,7 +421,7 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     backgroundColor: colors.background,
   },
   contentContainer: {
-    paddingBottom: spacing.xxl,
+    paddingBottom: 120,
   },
   header: {
     paddingTop: spacing.xl,

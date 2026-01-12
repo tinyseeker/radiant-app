@@ -10,12 +10,13 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { useActivity } from '../context/ActivityContext';
 import { spacing, borderRadius, typography } from '../theme/colors';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
 import { StreakBadge } from '../components/StreakBadge';
 import { VisionBoardImage } from '../types/journal';
 import { isMilestone } from '../utils/streakCalculator';
@@ -215,7 +216,12 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.checkInIcon}>{hasCheckedInToday ? '✅' : '🌟'}</Text>
+          <Ionicons
+            name={hasCheckedInToday ? 'checkmark-circle' : 'star'}
+            size={28}
+            color="#FFFFFF"
+            style={styles.checkInIcon}
+          />
           <Text style={styles.checkInText}>
             {hasCheckedInToday ? 'Already Checked In Today!' : 'Complete Daily Check-in'}
           </Text>
@@ -228,13 +234,19 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
           style={styles.actionButton}
           onPress={() => navigation.navigate('ViewJournal')}
         >
-          <Text style={styles.actionButtonText}>📖 View My Journal</Text>
+          <View style={styles.actionButtonContent}>
+            <Ionicons name="book-outline" size={20} color={colors.text.primary} />
+            <Text style={styles.actionButtonText}>View My Journal</Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => navigation.navigate('EditVisionBoard')}
         >
-          <Text style={styles.actionButtonText}>🖼️ Update Vision Board</Text>
+          <View style={styles.actionButtonContent}>
+            <Ionicons name="images-outline" size={20} color={colors.text.primary} />
+            <Text style={styles.actionButtonText}>Update Vision Board</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -247,7 +259,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.background,
   },
   contentContainer: {
-    paddingBottom: spacing.xxl,
+    paddingBottom: 120,
   },
   header: {
     paddingTop: spacing.xxl,
@@ -363,7 +375,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
   },
   checkInIcon: {
-    fontSize: 28,
     marginRight: spacing.sm,
   },
   checkInText: {
@@ -387,10 +398,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  actionButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
   actionButtonText: {
     ...typography.button,
     color: colors.text.primary,
     fontSize: 16,
-    textAlign: 'center',
   },
 });

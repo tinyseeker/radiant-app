@@ -19,9 +19,9 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   const styles = createStyles(colors);
 
   useEffect(() => {
-    // If user has completed onboarding, skip to Home
+    // If user has completed onboarding, skip to MainTabs
     if (journal.hasCompletedOnboarding) {
-      navigation.replace('Home');
+      navigation.replace('MainTabs');
       return;
     }
 

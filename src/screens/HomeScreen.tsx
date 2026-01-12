@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
 import { spacing, borderRadius, typography } from '../theme/colors';
-import { useActivity } from '../context/ActivityContext';
-import { ProgressCard } from '../components/ProgressCard';
 import { useTheme } from '../hooks/useTheme';
 
 type HomeScreenProps = {
@@ -13,20 +12,19 @@ type HomeScreenProps = {
 };
 
 const journalSections = [
-  { title: 'Affirmations', route: 'EditAffirmations' as const, icon: '✨', color: ['#FF9A76', '#FF6B9D'] as const },
-  { title: 'Vision Board', route: 'EditVisionBoard' as const, icon: '🖼️', color: ['#B19CD9', '#9B7EBD'] as const },
-  { title: 'Morning Routine', route: 'EditMorningRoutine' as const, icon: '🌅', color: ['#A8E6CF', '#8FBC8F'] as const },
-  { title: 'Evening Routine', route: 'EditEveningRoutine' as const, icon: '🌙', color: ['#FFB6C1', '#FF69B4'] as const },
-  { title: 'Goals', route: 'EditGoals' as const, icon: '🎯', color: ['#FFB347', '#FF8C42'] as const },
-  { title: 'Traits', route: 'EditTraits' as const, icon: '💎', color: ['#87CEEB', '#6BB6E3'] as const },
-  { title: 'Standards', route: 'EditStandards' as const, icon: '⭐', color: ['#FFD700', '#FFC700'] as const },
-  { title: 'Daily Reminders', route: 'EditReminders' as const, icon: '🔔', color: ['#FF9A76', '#FF7F66'] as const },
+  { title: 'Affirmations', route: 'EditAffirmations' as const, icon: '✨', image: require('../../assets/phoenix pray - transparent background.png'), color: ['#FF9A76', '#FF6B9D'] as const },
+  { title: 'Vision Board', route: 'EditVisionBoard' as const, icon: '🖼️', image: require('../../assets/vision board.png'), color: ['#B19CD9', '#9B7EBD'] as const },
+  { title: 'Morning Routine', route: 'EditMorningRoutine' as const, icon: '🌅', image: require('../../assets/phoenix morning - transparent background.png'), color: ['#A8E6CF', '#8FBC8F'] as const },
+  { title: 'Evening Routine', route: 'EditEveningRoutine' as const, icon: '🌙', image: require('../../assets/phoenix night - transparent background.png'), color: ['#FFB6C1', '#FF69B4'] as const },
+  { title: 'Goals', route: 'EditGoals' as const, icon: '🎯', image: require('../../assets/phoenix goal- transparent background.png'), color: ['#FFB347', '#FF8C42'] as const },
+  { title: 'Traits', route: 'EditTraits' as const, icon: '💎', image: require('../../assets/phoenix diamond - transparent background.png'), color: ['#87CEEB', '#6BB6E3'] as const },
+  { title: 'Standards', route: 'EditStandards' as const, icon: '⭐', image: require('../../assets/phoenix diamond - transparent background (2).png'), color: ['#FFD700', '#FFC700'] as const },
+  { title: 'Daily Reminders', route: 'EditReminders' as const, icon: '🔔', image: require('../../assets/phoenix bell - transparent background.png'), color: ['#FF9A76', '#FF7F66'] as const },
 ];
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const { activity, hasCheckedInToday } = useActivity();
-  const { colors } = useTheme();
-  const styles = createStyles(colors);
+  const { colors, isDarkMode } = useTheme();
+  const styles = createStyles(colors, isDarkMode);
 
   return (
     <View style={styles.container}>
@@ -36,19 +34,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={() => navigation.navigate('Settings')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.settingsIcon}>⚙️</Text>
-        </TouchableOpacity>
         <View style={styles.headerContent}>
           <View style={styles.logoSmall}>
-            <Text style={styles.logoEmoji}>✨</Text>
+            <Image
+              source={require('../../assets/phoenix - transparent.png')}
+              style={styles.phoenixImage}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.title}>Radiant</Text>
-          <Text style={styles.subtitle}>Your Self-Transcendence Journal</Text>
         </View>
       </LinearGradient>
 
@@ -57,30 +51,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('ViewJournal')}
-        >
-          <LinearGradient
-            colors={colors.gradients.secondary}
-            style={styles.viewButton}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Text style={styles.viewButtonIcon}>📖</Text>
-            <Text style={styles.viewButtonText}>View My Journal</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        <View style={styles.progressCardContainer}>
-          <ProgressCard
-            streakData={activity.streakData}
-            checkIns={activity.checkIns}
-            hasCheckedInToday={hasCheckedInToday}
-            onPress={() => navigation.navigate('DailyCheckIn')}
-          />
-        </View>
-
         <View style={styles.sectionsContainer}>
           <Text style={styles.sectionHeader}>Journal Sections</Text>
           <View style={styles.cardsGrid}>
@@ -91,20 +61,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 onPress={() => navigation.navigate(section.route)}
                 style={styles.cardWrapper}
               >
-                <View style={styles.sectionCard}>
-                  <LinearGradient
-                    colors={section.color}
-                    style={styles.iconBadge}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
+                <BlurView
+                  intensity={isDarkMode ? 40 : 20}
+                  tint={isDarkMode ? 'dark' : 'light'}
+                  style={styles.sectionCard}
+                >
+                  {section.image ? (
+                    <Image
+                      source={section.image}
+                      style={styles.iconImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
                     <Text style={styles.iconText}>{section.icon}</Text>
-                  </LinearGradient>
+                  )}
                   <Text style={styles.sectionTitle}>{section.title}</Text>
-                  <View style={styles.arrowContainer}>
-                    <Text style={styles.arrow}>→</Text>
-                  </View>
-                </View>
+                </BlurView>
               </TouchableOpacity>
             ))}
           </View>
@@ -114,44 +86,35 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   );
 }
 
-const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
+const createStyles = (colors: typeof import('../theme/colors').lightColors | typeof import('../theme/colors').darkColors, isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   headerGradient: {
-    paddingTop: 60,
-    paddingBottom: spacing.xl,
+    paddingTop: 50,
+    paddingBottom: spacing.md,
     borderBottomLeftRadius: borderRadius.xl,
     borderBottomRightRadius: borderRadius.xl,
   },
-  settingsButton: {
-    position: 'absolute',
-    top: 60,
-    right: spacing.lg,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  settingsIcon: {
-    fontSize: 24,
-  },
   headerContent: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
   logoSmall: {
     width: 60,
     height: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginRight: spacing.sm,
+  },
+  phoenixImage: {
+    width: 50,
+    height: 50,
   },
   logoEmoji: {
     fontSize: 30,
@@ -159,7 +122,7 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   title: {
     ...typography.h1,
     color: colors.text.white,
-    marginBottom: spacing.xs,
+    fontSize: 28,
   },
   subtitle: {
     ...typography.body,
@@ -170,34 +133,7 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   },
   scrollContent: {
     paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  viewButton: {
-    marginHorizontal: spacing.lg,
-    paddingVertical: 20,
-    borderRadius: borderRadius.xl,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    shadowColor: colors.secondary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
-    marginBottom: spacing.xl,
-  },
-  viewButtonIcon: {
-    fontSize: 24,
-    marginRight: spacing.sm,
-  },
-  viewButtonText: {
-    ...typography.button,
-    color: colors.text.white,
-    fontSize: 18,
-  },
-  progressCardContainer: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
+    paddingBottom: 120,
   },
   sectionsContainer: {
     paddingHorizontal: spacing.lg,
@@ -208,55 +144,45 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     marginBottom: spacing.md,
   },
   cardsGrid: {
-    marginTop: -spacing.sm,
-  },
-  cardWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginTop: spacing.sm,
   },
-  sectionCard: {
-    backgroundColor: colors.backgroundLight,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+  cardWrapper: {
+    width: '48%',
+    marginBottom: spacing.md,
   },
-  iconBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
+  sectionCard: {
+    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.7)',
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.3)',
+    padding: spacing.md,
     alignItems: 'center',
-    marginRight: spacing.md,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'center',
+    minHeight: 100,
+    overflow: 'hidden',
+    shadowColor: isDarkMode ? '#000' : colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDarkMode ? 0.3 : 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   iconText: {
-    fontSize: 24,
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
+  iconImage: {
+    width: 50,
+    height: 50,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
-    flex: 1,
     ...typography.body,
     fontWeight: '600',
     color: colors.text.primary,
-  },
-  arrowContainer: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.backgroundDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  arrow: {
-    fontSize: 18,
-    color: colors.text.tertiary,
+    textAlign: 'center',
+    fontSize: 15,
   },
 });
