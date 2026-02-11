@@ -2,7 +2,7 @@
   "expo": {
     "name": "Radiant",
     "slug": "radiant",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "Transform your mindset with daily gratitude, affirmations, and vision boards. Build streaks, track progress, and become the person you want to be.",
     "privacyPolicy": "https://tinyseeker.github.io/radiant-app/privacy-policy.html",
     "supportUrl": "mailto:thetinyseeker@gmail.com",
@@ -35,7 +35,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.radiantapp.ios",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "supportsTablet": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Radiant needs access to your photo library to add images to your vision board.",
@@ -48,7 +48,7 @@
     },
     "android": {
       "package": "com.radiantapp.android",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
