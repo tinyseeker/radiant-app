@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { spacing, borderRadius, typography } from '../theme/colors';
 import { useTheme } from '../hooks/useTheme';
@@ -28,6 +29,7 @@ const onboardingSteps = [
 
 export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { updateJournal } = useJournal();
   const [currentStep, setCurrentStep] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -79,7 +81,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 80 }]}>
         <View style={styles.stepIndicator}>
           {onboardingSteps.map((_, index) => (
             <View key={index} style={styles.dotContainer}>
@@ -152,7 +154,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: 80,
     paddingBottom: 40,
   },
   stepIndicator: {

@@ -32,14 +32,15 @@ export const ProgressCard: React.FC<ProgressCardProps> = ({
       return 'No check-ins yet';
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     if (lastCheckInDate === today) {
       return `Today at ${formatCheckInTime(checkIn.timestamp)}`;
     }
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
     if (lastCheckInDate === yesterdayStr) {
       return `Yesterday at ${formatCheckInTime(checkIn.timestamp)}`;

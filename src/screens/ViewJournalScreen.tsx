@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { VisionBoardCategory } from '../types/journal';
@@ -13,10 +14,11 @@ type ViewJournalScreenProps = {
 export default function ViewJournalScreen({ navigation }: ViewJournalScreenProps) {
   const { journal } = useJournal();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(colors);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + 30 }]}>
       <Text style={styles.mainTitle}>My Self-Transcendence Journal</Text>
 
       {journal.affirmations.length > 0 && (
@@ -41,6 +43,17 @@ export default function ViewJournalScreen({ navigation }: ViewJournalScreenProps
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Evening Routine</Text>
           <Text style={styles.bodyText}>{journal.eveningRoutine}</Text>
+        </View>
+      )}
+
+      {journal.dailyHabits && journal.dailyHabits.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Daily Habits</Text>
+          {journal.dailyHabits.map((habit, index) => (
+            <Text key={index} style={styles.listItem}>
+              • {habit}
+            </Text>
+          ))}
         </View>
       )}
 
@@ -191,6 +204,7 @@ export default function ViewJournalScreen({ navigation }: ViewJournalScreenProps
       {journal.affirmations.length === 0 &&
        !journal.morningRoutine &&
        !journal.eveningRoutine &&
+       (!journal.dailyHabits || journal.dailyHabits.length === 0) &&
        journal.traits.length === 0 &&
        journal.standards.length === 0 &&
        journal.dailyReminders.length === 0 &&
@@ -211,7 +225,6 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   },
   contentContainer: {
     paddingHorizontal: 24,
-    paddingTop: 30,
     paddingBottom: 120,
   },
   mainTitle: {

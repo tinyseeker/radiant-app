@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { UserActivity, initialUserActivity } from '../types/activity';
 import { storageService } from '../utils/storage';
 import { processCheckIn, hasCheckedInToday, calculateStreak } from '../utils/streakCalculator';
+import { notificationService } from '../utils/notificationService';
 
 interface ActivityContextType {
   activity: UserActivity;
@@ -53,9 +54,19 @@ export const ActivityProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const updatedActivity = processCheckIn(activity);
+      const newStreak = updatedActivity.streakData.currentStreak;
+
       setActivity(updatedActivity);
       setCheckedInToday(true);
       await storageService.saveActivity(updatedActivity);
+
+      // Cancel today's streak protection notification since user checked in
+      await notificationService.cancelStreakNotification();
+
+      // Check if user hit a milestone and send congratulatory notification
+      if (notificationService.isMilestone(newStreak)) {
+        await notificationService.sendMilestoneNotification(newStreak);
+      }
     } catch (error) {
       console.error('Failed to check in:', error);
       throw error;

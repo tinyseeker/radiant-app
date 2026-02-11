@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { useSettings } from '../context/SettingsContext';
 import { useJournal } from '../context/JournalContext';
@@ -30,6 +31,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { journal } = useJournal();
   const { activity } = useActivity();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [isEnabling, setIsEnabling] = useState(false);
   const [isExportingJSON, setIsExportingJSON] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
@@ -157,7 +159,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       {/* Header */}
       <LinearGradient
         colors={colors.gradients.primary}
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + spacing.md }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
@@ -424,7 +426,6 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     paddingBottom: 120,
   },
   header: {
-    paddingTop: spacing.xl,
     paddingBottom: spacing.xl,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',

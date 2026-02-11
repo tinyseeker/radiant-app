@@ -2,7 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { spacing, borderRadius, typography } from '../theme/colors';
 import { useTheme } from '../hooks/useTheme';
@@ -15,6 +17,7 @@ const journalSections = [
   { title: 'Affirmations', route: 'EditAffirmations' as const, icon: '✨', image: require('../../assets/phoenix pray - transparent background.png'), color: ['#FF9A76', '#FF6B9D'] as const },
   { title: 'Vision Board', route: 'EditVisionBoard' as const, icon: '🖼️', image: require('../../assets/vision board.png'), color: ['#B19CD9', '#9B7EBD'] as const },
   { title: 'Morning Routine', route: 'EditMorningRoutine' as const, icon: '🌅', image: require('../../assets/phoenix morning - transparent background.png'), color: ['#A8E6CF', '#8FBC8F'] as const },
+  { title: 'Daily Habits', route: 'EditDailyHabits' as const, icon: '✅', image: require('../../assets/phoenix pray - transparent background.png'), color: ['#9ED2C6', '#54BAB9'] as const },
   { title: 'Evening Routine', route: 'EditEveningRoutine' as const, icon: '🌙', image: require('../../assets/phoenix night - transparent background.png'), color: ['#FFB6C1', '#FF69B4'] as const },
   { title: 'Goals', route: 'EditGoals' as const, icon: '🎯', image: require('../../assets/phoenix goal- transparent background.png'), color: ['#FFB347', '#FF8C42'] as const },
   { title: 'Traits', route: 'EditTraits' as const, icon: '💎', image: require('../../assets/phoenix diamond - transparent background.png'), color: ['#87CEEB', '#6BB6E3'] as const },
@@ -24,25 +27,27 @@ const journalSections = [
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors, isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(colors, isDarkMode);
 
   return (
     <View style={styles.container}>
       <LinearGradient
         colors={colors.gradients.primary}
-        style={styles.headerGradient}
+        style={[styles.headerGradient, { paddingTop: insets.top + spacing.md }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <View style={styles.headerContent}>
-          <View style={styles.logoSmall}>
-            <Image
-              source={require('../../assets/phoenix - transparent.png')}
-              style={styles.phoenixImage}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.title}>Radiant</Text>
+        <View style={styles.headerRow}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.title}>My Inner World</Text>
+          <View style={styles.backButtonPlaceholder} />
         </View>
       </LinearGradient>
 
@@ -52,7 +57,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.sectionsContainer}>
-          <Text style={styles.sectionHeader}>Journal Sections</Text>
+          <Text style={styles.sectionHeader}>My Inner World</Text>
           <View style={styles.cardsGrid}>
             {journalSections.map((section) => (
               <TouchableOpacity
@@ -92,16 +97,27 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors | typ
     backgroundColor: colors.background,
   },
   headerGradient: {
-    paddingTop: 50,
     paddingBottom: spacing.md,
     borderBottomLeftRadius: borderRadius.xl,
     borderBottomRightRadius: borderRadius.xl,
   },
-  headerContent: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+  },
+  backButtonPlaceholder: {
+    width: 44,
+    height: 44,
   },
   logoSmall: {
     width: 60,

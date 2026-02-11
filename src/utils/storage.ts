@@ -25,6 +25,7 @@ export const storageService = {
           ...initialJournalData,
           ...parsed,
           visionBoards: parsed.visionBoards || initialJournalData.visionBoards,
+          dailyEntries: parsed.dailyEntries || initialJournalData.dailyEntries,
         };
       }
       return initialJournalData;

@@ -29,9 +29,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/Load Screen.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
       "bundleIdentifier": "com.radiantapp.ios",
@@ -41,6 +41,8 @@
         "NSPhotoLibraryUsageDescription": "Radiant needs access to your photo library to add images to your vision board.",
         "NSCameraUsageDescription": "Radiant needs access to your camera to take photos for your vision board.",
         "NSUserNotificationsUsageDescription": "Radiant sends daily reminders to help you maintain your gratitude practice and keep your streak alive.",
+        "NSSpeechRecognitionUsageDescription": "Radiant needs speech recognition access to convert your spoken words into text for journal entries.",
+        "NSMicrophoneUsageDescription": "Radiant needs access to your microphone to transcribe your evening reflections using voice.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -56,7 +58,8 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "READ_MEDIA_IMAGES",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "RECORD_AUDIO"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -68,6 +71,14 @@
           "icon": "./assets/icon.png",
           "color": "#FF9A76",
           "sounds": []
+        }
+      ],
+      "expo-font",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Radiant needs access to your microphone to transcribe your evening reflections using voice.",
+          "speechRecognitionPermission": "Radiant needs speech recognition access to convert your spoken words into text."
         }
       ]
     ],

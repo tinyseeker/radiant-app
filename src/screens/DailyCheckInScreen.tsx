@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { useActivity } from '../context/ActivityContext';
@@ -27,6 +28,7 @@ type DailyCheckInScreenProps = {
 
 export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { journal } = useJournal();
   const { activity, checkIn, hasCheckedInToday } = useActivity();
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -138,7 +140,7 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
       {/* Header Section */}
       <LinearGradient
         colors={colors.gradients.primary}
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + spacing.md }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
@@ -198,7 +200,7 @@ export default function DailyCheckInScreen({ navigation }: DailyCheckInScreenPro
             style={styles.slideshowLink}
             onPress={() => navigation.navigate('VisionBoardSlideshow')}
           >
-            <Text style={styles.slideshowLinkText}>View Full Slideshow →</Text>
+            <Text style={styles.slideshowLinkText}>View Vision Flow →</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -262,7 +264,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingBottom: 120,
   },
   header: {
-    paddingTop: spacing.xxl,
     paddingBottom: spacing.xxl,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',

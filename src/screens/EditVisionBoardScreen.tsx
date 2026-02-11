@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, TextInput, Modal } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, TextInput, Modal, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { spacing, borderRadius, typography } from '../theme/colors';
 import { useTheme } from '../hooks/useTheme';
 import { VisionBoardCategory, VisionBoardImage } from '../types/journal';
 
+const { width: screenWidth } = Dimensions.get('window');
+const imageSize = (screenWidth - spacing.lg * 2 - spacing.sm * 2) / 3;
+
 type EditVisionBoardScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'EditVisionBoard'>;
+  route: RouteProp<RootStackParamList, 'EditVisionBoard'>;
 };
 
 const categories: { key: VisionBoardCategory; title: string; icon: string; color: readonly [string, string] }[] = [
@@ -22,22 +28,39 @@ const categories: { key: VisionBoardCategory; title: string; icon: string; color
   { key: 'inspiration', title: 'Inspiration', icon: '⭐', color: ['#87CEEB', '#6BB6E3'] as const },
 ];
 
-export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScreenProps) {
-  const { colors } = useTheme();
+export default function EditVisionBoardScreen({ navigation, route }: EditVisionBoardScreenProps) {
+  const { colors, isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
   const { journal, updateJournal } = useJournal();
-  const [selectedCategory, setSelectedCategory] = useState<VisionBoardCategory>('roleModels');
+  const initialCategory = route.params?.category || 'roleModels';
+  const [selectedCategory, setSelectedCategory] = useState<VisionBoardCategory>(initialCategory);
   const [labelModalVisible, setLabelModalVisible] = useState(false);
+  const categoryScrollRef = useRef<ScrollView>(null);
+
+  // Scroll to the initially selected category
+  useEffect(() => {
+    const categoryIndex = categories.findIndex(c => c.key === initialCategory);
+    if (categoryIndex > 0 && categoryScrollRef.current) {
+      // Approximate width per pill (adjust based on actual styling)
+      const pillWidth = 120;
+      const scrollPosition = categoryIndex * pillWidth;
+      setTimeout(() => {
+        categoryScrollRef.current?.scrollTo({ x: scrollPosition, animated: false });
+      }, 100);
+    }
+  }, [initialCategory]);
   const [selectedImageForLabel, setSelectedImageForLabel] = useState<VisionBoardImage | null>(null);
   const [labelText, setLabelText] = useState('');
 
   const currentImages = journal.visionBoards[selectedCategory];
   const maxImages = 10;
 
-  // Calculate total images across all categories
   const totalImages = Object.values(journal.visionBoards).reduce(
     (sum, categoryImages) => sum + categoryImages.length,
     0
   );
+
+  const currentCategory = categories.find(c => c.key === selectedCategory)!;
 
   const pickImage = async () => {
     if (currentImages.length >= maxImages) {
@@ -164,118 +187,136 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
     ]);
   };
 
-  const styles = createStyles(colors);
+  const styles = createStyles(colors, isDarkMode);
 
   return (
-    <View style={styles.screenOverlay}>
-      <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Vision Board</Text>
+        <TouchableOpacity
+          style={[styles.slideshowButton, totalImages === 0 && styles.slideshowButtonDisabled]}
+          onPress={() => totalImages > 0 && navigation.navigate('VisionBoardSlideshow')}
+          disabled={totalImages === 0}
+        >
+          <Ionicons name="play" size={18} color={totalImages > 0 ? '#FFFFFF' : colors.text.tertiary} />
+        </TouchableOpacity>
+      </View>
 
-        {/* Category Tabs */}
-        <ScrollView
+      {/* Category Pills */}
+      <ScrollView
+        ref={categoryScrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.tabsContainer}
-        contentContainerStyle={styles.tabsContent}
+        style={styles.categoryContainer}
+        contentContainerStyle={styles.categoryContent}
       >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category.key}
-            activeOpacity={0.7}
-            onPress={() => setSelectedCategory(category.key)}
-          >
-            <LinearGradient
-              colors={selectedCategory === category.key ? category.color : ['#F0F0F0', '#F0F0F0']}
-              style={styles.tab}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+        {categories.map((category) => {
+          const isSelected = selectedCategory === category.key;
+          const categoryCount = journal.visionBoards[category.key].length;
+          return (
+            <TouchableOpacity
+              key={category.key}
+              activeOpacity={0.7}
+              onPress={() => setSelectedCategory(category.key)}
+              style={[
+                styles.categoryPill,
+                isSelected && { backgroundColor: category.color[0] }
+              ]}
             >
-              <Text style={styles.tabIcon}>{category.icon}</Text>
-              <Text style={[
-                styles.tabText,
-                selectedCategory === category.key && styles.tabTextActive
-              ]}>
+              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <Text style={[styles.categoryText, isSelected && styles.categoryTextActive]}>
                 {category.title}
               </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
+              {categoryCount > 0 && (
+                <View style={[styles.countBadge, isSelected && styles.countBadgeActive]}>
+                  <Text style={[styles.countBadgeText, isSelected && styles.countBadgeTextActive]}>
+                    {categoryCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* Content */}
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>
-              {categories.find(c => c.key === selectedCategory)?.title}
-            </Text>
-            <Text style={styles.count}>{currentImages.length} / {maxImages} images</Text>
-          </View>
-          <TouchableOpacity
-            style={[styles.slideshowButton, totalImages === 0 && styles.slideshowButtonDisabled]}
-            onPress={() => totalImages > 0 && navigation.navigate('VisionBoardSlideshow')}
-            activeOpacity={totalImages > 0 ? 0.7 : 1}
-            disabled={totalImages === 0}
-          >
-            <Text style={[styles.slideshowButtonText, totalImages === 0 && styles.slideshowButtonTextDisabled]}>
-              🎬 Slideshow
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Image Grid */}
-        <View style={styles.grid}>
-          {/* Add Button */}
-          <TouchableOpacity style={styles.addButton} onPress={addImageOptions} activeOpacity={0.7}>
-            <LinearGradient
-              colors={categories.find(c => c.key === selectedCategory)!.color}
-              style={styles.addButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.addButtonIcon}>+</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Images */}
-          {currentImages.map((image) => (
-            <View key={image.id} style={styles.imageContainer}>
-              <Image source={{ uri: image.uri }} style={styles.image} />
-              {image.label && (
-                <View style={styles.labelBadge}>
-                  <Text style={styles.labelText} numberOfLines={1}>{image.label}</Text>
-                </View>
-              )}
-              <View style={styles.imageActions}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => openLabelModal(image)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.actionIcon}>🏷️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => deleteImage(image.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.actionIcon}>🗑️</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {currentImages.length === 0 && (
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {currentImages.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📸</Text>
-            <Text style={styles.emptyText}>No images yet</Text>
-            <Text style={styles.emptySubtext}>Tap + to add your first image</Text>
+            <View style={styles.emptyIconContainer}>
+              <Text style={styles.emptyIcon}>{currentCategory.icon}</Text>
+            </View>
+            <Text style={styles.emptyTitle}>No {currentCategory.title} yet</Text>
+            <Text style={styles.emptySubtext}>
+              Add images that inspire your vision
+            </Text>
+            <TouchableOpacity style={styles.emptyAddButton} onPress={addImageOptions}>
+              <LinearGradient
+                colors={currentCategory.color}
+                style={styles.emptyAddButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="add" size={20} color="#FFFFFF" />
+                <Text style={styles.emptyAddButtonText}>Add First Image</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.grid}>
+            {currentImages.map((image) => (
+              <TouchableOpacity
+                key={image.id}
+                style={styles.imageContainer}
+                onLongPress={() => deleteImage(image.id)}
+                onPress={() => openLabelModal(image)}
+                activeOpacity={0.9}
+              >
+                <Image source={{ uri: image.uri }} style={styles.image} />
+                {image.label && (
+                  <View style={styles.labelBadge}>
+                    <Text style={styles.labelText} numberOfLines={1}>{image.label}</Text>
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => deleteImage(image.id)}
+                >
+                  <Ionicons name="close" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
           </View>
         )}
+
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Floating Add Button */}
+      {currentImages.length > 0 && currentImages.length < maxImages && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={addImageOptions}
+          activeOpacity={0.9}
+        >
+          <LinearGradient
+            colors={currentCategory.color}
+            style={styles.fabGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="add" size={28} color="#FFFFFF" />
+          </LinearGradient>
+        </TouchableOpacity>
+      )}
 
       {/* Label Modal */}
       <Modal
@@ -290,6 +331,7 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
             <TextInput
               style={styles.modalInput}
               placeholder="Enter a description..."
+              placeholderTextColor={colors.text.tertiary}
               value={labelText}
               onChangeText={setLabelText}
               maxLength={50}
@@ -305,9 +347,9 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
               >
                 <Text style={styles.modalButtonTextCancel}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={saveLabel} activeOpacity={0.8}>
+              <TouchableOpacity onPress={saveLabel} activeOpacity={0.8} style={{ flex: 1 }}>
                 <LinearGradient
-                  colors={colors.gradients.primary}
+                  colors={currentCategory.color}
                   style={[styles.modalButton, styles.modalButtonSave]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -319,30 +361,23 @@ export default function EditVisionBoardScreen({ navigation }: EditVisionBoardScr
           </View>
         </View>
       </Modal>
-      </View>
     </View>
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
-  screenOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
+const createStyles = (colors: any, isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: 80,
-    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 24,
-    zIndex: 10,
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -350,113 +385,87 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.backgroundLight,
     borderRadius: 20,
   },
-  tabsContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundDark,
-    marginTop: 70,
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Quicksand_700Bold',
+    color: colors.text.primary,
   },
-  tabsContent: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  slideshowButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 20,
   },
-  tab: {
+  slideshowButtonDisabled: {
+    backgroundColor: colors.backgroundLight,
+  },
+  categoryContainer: {
+    maxHeight: 50,
+  },
+  categoryContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
+    backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.round,
     marginRight: spacing.sm,
   },
-  tabIcon: {
-    fontSize: 20,
-    marginRight: spacing.xs,
+  categoryIcon: {
+    fontSize: 16,
+    marginRight: 6,
   },
-  tabText: {
-    ...typography.body,
-    fontSize: 15,
-    fontWeight: '600',
+  categoryText: {
+    fontSize: 14,
+    fontFamily: 'Quicksand_600SemiBold',
+    color: colors.text.secondary,
+  },
+  categoryTextActive: {
+    color: '#FFFFFF',
+  },
+  countBadge: {
+    marginLeft: 6,
+    backgroundColor: colors.backgroundDark,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  countBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  countBadgeText: {
+    fontSize: 11,
+    fontFamily: 'Quicksand_600SemiBold',
     color: colors.text.tertiary,
   },
-  tabTextActive: {
-    color: colors.text.white,
+  countBadgeTextActive: {
+    color: '#FFFFFF',
   },
   content: {
     flex: 1,
   },
   contentContainer: {
     paddingHorizontal: spacing.lg,
-    paddingTop: 3,
-    paddingBottom: spacing.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  title: {
-    ...typography.h2,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  count: {
-    ...typography.caption,
-    color: colors.text.tertiary,
-  },
-  slideshowButton: {
-    backgroundColor: colors.accent.info,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  slideshowButtonText: {
-    ...typography.button,
-    color: colors.text.white,
-    fontSize: 14,
-  },
-  slideshowButtonDisabled: {
-    backgroundColor: colors.backgroundDark,
-    opacity: 0.5,
-  },
-  slideshowButtonTextDisabled: {
-    color: colors.text.tertiary,
+    paddingTop: spacing.md,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -spacing.sm,
-  },
-  addButton: {
-    width: '47%',
-    aspectRatio: 1,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
-    marginHorizontal: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  addButtonGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonIcon: {
-    fontSize: 48,
-    color: colors.text.white,
-    fontWeight: '300',
+    gap: spacing.sm,
   },
   imageContainer: {
-    width: '47%',
-    aspectRatio: 1,
-    borderRadius: borderRadius.lg,
+    width: imageSize,
+    height: imageSize,
+    borderRadius: borderRadius.md,
     overflow: 'hidden',
     position: 'relative',
-    marginHorizontal: spacing.sm,
-    marginBottom: spacing.md,
   },
   image: {
     width: '100%',
@@ -467,49 +476,88 @@ const createStyles = (colors: any) => StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: spacing.xs,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 4,
+    paddingHorizontal: 6,
   },
   labelText: {
-    color: colors.text.white,
-    fontSize: 12,
-    fontWeight: '500',
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Quicksand_500Medium',
   },
-  imageActions: {
+  deleteButton: {
     position: 'absolute',
-    top: spacing.xs,
-    right: spacing.xs,
-    flexDirection: 'row',
-  },
-  actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: spacing.xs,
-  },
-  actionIcon: {
-    fontSize: 16,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.xxl * 2,
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: spacing.md,
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.backgroundLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
-  emptyText: {
-    ...typography.h3,
-    color: colors.text.tertiary,
+  emptyIcon: {
+    fontSize: 36,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: 'Quicksand_600SemiBold',
+    color: colors.text.primary,
     marginBottom: spacing.xs,
   },
   emptySubtext: {
-    ...typography.body,
-    color: colors.text.light,
+    fontSize: 14,
+    fontFamily: 'Quicksand_400Regular',
+    color: colors.text.tertiary,
+    marginBottom: spacing.lg,
+  },
+  emptyAddButton: {
+    borderRadius: borderRadius.round,
+    overflow: 'hidden',
+  },
+  emptyAddButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.xs,
+  },
+  emptyAddButtonText: {
+    fontSize: 15,
+    fontFamily: 'Quicksand_600SemiBold',
+    color: '#FFFFFF',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: spacing.lg,
+    borderRadius: 28,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabGradient: {
+    width: 56,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalOverlay: {
     flex: 1,
@@ -526,7 +574,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     maxWidth: 400,
   },
   modalTitle: {
-    ...typography.h3,
+    fontSize: 18,
+    fontFamily: 'Quicksand_700Bold',
     color: colors.text.primary,
     marginBottom: spacing.md,
   },
@@ -535,29 +584,35 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing.md,
     fontSize: 16,
+    fontFamily: 'Quicksand_400Regular',
     color: colors.text.primary,
     marginBottom: spacing.lg,
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
   modalButton: {
-    width: '48%',
+    flex: 1,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.lg,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   modalButtonCancel: {
     backgroundColor: colors.backgroundDark,
   },
-  modalButtonSave: {},
+  modalButtonSave: {
+    flex: 1,
+  },
   modalButtonTextCancel: {
-    ...typography.button,
+    fontSize: 15,
+    fontFamily: 'Quicksand_600SemiBold',
     color: colors.text.secondary,
   },
   modalButtonTextSave: {
-    ...typography.button,
-    color: colors.text.white,
+    fontSize: 15,
+    fontFamily: 'Quicksand_600SemiBold',
+    color: '#FFFFFF',
   },
 });

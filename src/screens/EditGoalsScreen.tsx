@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { useJournal } from '../context/JournalContext';
 import { useTheme } from '../hooks/useTheme';
 import { EmptyState } from '../components/EmptyState';
+import { spacing, borderRadius } from '../theme/colors';
 
 type EditGoalsScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'EditGoals'>;
@@ -14,8 +16,14 @@ type EditGoalsScreenProps = {
 export default function EditGoalsScreen({ navigation }: EditGoalsScreenProps) {
   const { journal, updateJournal } = useJournal();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [goals, setGoals] = useState(journal.goals);
+  const scrollViewRef = useRef<ScrollView>(null);
   const styles = createStyles(colors);
+
+  const scrollToInput = (y: number) => {
+    scrollViewRef.current?.scrollTo({ y: y - 100, animated: true });
+  };
 
   const updateGoal = (key: keyof typeof goals, value: string) => {
     setGoals({ ...goals, [key]: value });
@@ -34,98 +42,130 @@ export default function EditGoalsScreen({ navigation }: EditGoalsScreenProps) {
   const hasAnyGoals = goals.wealth.trim() || goals.business.trim() || goals.healthFitness.trim() || goals.personalBehavior.trim();
 
   return (
-    <View style={styles.modalOverlay}>
-      <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <ScrollView style={styles.content}>
-          <Text style={styles.title}>Goals</Text>
-        <Text style={styles.description}>
-          Define clear goals across the key areas of your life.
-        </Text>
+        <Text style={styles.headerTitle}>Goals</Text>
+        <View style={styles.headerSpacer} />
+      </View>
 
-        {!hasAnyGoals && (
-          <EmptyState message="No goals yet. Start defining your goals below!" />
-        )}
+      <KeyboardAvoidingView style={styles.keyboardView} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.description}>
+            Define clear goals across the key areas of your life.
+          </Text>
 
-        <View style={styles.goalSection}>
-          <Text style={styles.label}>Wealth Goals</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="What are your financial and wealth goals?"
-            value={goals.wealth}
-            onChangeText={(text) => updateGoal('wealth', text)}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
+          {!hasAnyGoals && (
+            <EmptyState message="No goals yet. Start defining your goals below!" />
+          )}
 
-        <View style={styles.goalSection}>
-          <Text style={styles.label}>Business Goals</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="What are your business and career goals?"
-            value={goals.business}
-            onChangeText={(text) => updateGoal('business', text)}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
+          <View style={styles.goalSection}>
+            <Text style={styles.label}>Wealth Goals</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="What are your financial and wealth goals?"
+              placeholderTextColor={colors.text.tertiary}
+              value={goals.wealth}
+              onChangeText={(text) => updateGoal('wealth', text)}
+              multiline
+              textAlignVertical="top"
+              onFocus={(e) => {
+                e.target.measure((x, y, width, height, pageX, pageY) => {
+                  scrollToInput(pageY);
+                });
+              }}
+            />
+          </View>
 
-        <View style={styles.goalSection}>
-          <Text style={styles.label}>Health & Fitness Goals</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="What are your health and fitness goals?"
-            value={goals.healthFitness}
-            onChangeText={(text) => updateGoal('healthFitness', text)}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
+          <View style={styles.goalSection}>
+            <Text style={styles.label}>Business Goals</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="What are your business and career goals?"
+              placeholderTextColor={colors.text.tertiary}
+              value={goals.business}
+              onChangeText={(text) => updateGoal('business', text)}
+              multiline
+              textAlignVertical="top"
+              onFocus={(e) => {
+                e.target.measure((x, y, width, height, pageX, pageY) => {
+                  scrollToInput(pageY);
+                });
+              }}
+            />
+          </View>
 
-        <View style={styles.goalSection}>
-          <Text style={styles.label}>Personal & Behavior Goals</Text>
-          <TextInput
-            style={styles.textArea}
-            placeholder="What personal development and behavior goals do you have?"
-            value={goals.personalBehavior}
-            onChangeText={(text) => updateGoal('personalBehavior', text)}
-            multiline
-            textAlignVertical="top"
-          />
-        </View>
+          <View style={styles.goalSection}>
+            <Text style={styles.label}>Health & Fitness Goals</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="What are your health and fitness goals?"
+              placeholderTextColor={colors.text.tertiary}
+              value={goals.healthFitness}
+              onChangeText={(text) => updateGoal('healthFitness', text)}
+              multiline
+              textAlignVertical="top"
+              onFocus={(e) => {
+                e.target.measure((x, y, width, height, pageX, pageY) => {
+                  scrollToInput(pageY);
+                });
+              }}
+            />
+          </View>
+
+          <View style={styles.goalSection}>
+            <Text style={styles.label}>Personal & Behavior Goals</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="What personal development and behavior goals do you have?"
+              placeholderTextColor={colors.text.tertiary}
+              value={goals.personalBehavior}
+              onChangeText={(text) => updateGoal('personalBehavior', text)}
+              multiline
+              textAlignVertical="top"
+              onFocus={(e) => {
+                e.target.measure((x, y, width, height, pageX, pageY) => {
+                  scrollToInput(pageY);
+                });
+              }}
+            />
+          </View>
+
+          <View style={{ height: 100 }} />
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Save</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
 
 const createStyles = (colors: typeof import('../theme/colors').lightColors) => StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: 80,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 24,
-    zIndex: 10,
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -133,55 +173,63 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     backgroundColor: colors.backgroundLight,
     borderRadius: 20,
   },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: 'Quicksand_700Bold',
+    color: colors.text.primary,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  keyboardView: {
+    flex: 1,
+  },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 70,
-    paddingBottom: 100,
+    paddingHorizontal: spacing.lg,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 12,
+  scrollContent: {
+    paddingTop: spacing.md,
+    paddingBottom: 100,
   },
   description: {
     fontSize: 15,
+    fontFamily: 'Quicksand_400Regular',
     color: colors.text.secondary,
     lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   goalSection: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   label: {
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: 'Quicksand_600SemiBold',
     color: colors.text.primary,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   textArea: {
     backgroundColor: colors.backgroundLight,
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
     fontSize: 16,
+    fontFamily: 'Quicksand_400Regular',
     color: colors.text.primary,
     minHeight: 100,
     lineHeight: 22,
   },
   footer: {
-    padding: 24,
-    paddingBottom: 32,
+    padding: spacing.lg,
     backgroundColor: colors.background,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: colors.backgroundLight,
   },
   saveButton: {
-    backgroundColor: '#FF9A76',
-    paddingVertical: 16,
-    borderRadius: 30,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.round,
     alignItems: 'center',
-    shadowColor: '#FF9A76',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -190,6 +238,6 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: 'Quicksand_600SemiBold',
   },
 });

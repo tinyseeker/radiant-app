@@ -9,16 +9,16 @@ import { useTheme } from '../hooks/useTheme';
 import { EmptyState } from '../components/EmptyState';
 import { spacing, borderRadius } from '../theme/colors';
 
-type EditStandardsScreenProps = {
-  navigation: StackNavigationProp<RootStackParamList, 'EditStandards'>;
+type EditDailyHabitsScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'EditDailyHabits'>;
 };
 
-export default function EditStandardsScreen({ navigation }: EditStandardsScreenProps) {
+export default function EditDailyHabitsScreen({ navigation }: EditDailyHabitsScreenProps) {
   const { journal, updateJournal } = useJournal();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const [standards, setStandards] = useState<string[]>(journal.standards);
-  const [newStandard, setNewStandard] = useState('');
+  const [habits, setHabits] = useState<string[]>(journal.dailyHabits || []);
+  const [newHabit, setNewHabit] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
@@ -28,59 +28,49 @@ export default function EditStandardsScreen({ navigation }: EditStandardsScreenP
     scrollViewRef.current?.scrollTo({ y: Math.max(0, y - 150), animated: true });
   };
 
-  const addStandard = () => {
-    if (newStandard.trim()) {
+  const addHabit = () => {
+    if (newHabit.trim()) {
       if (editingIndex !== null) {
-        const updated = [...standards];
-        updated[editingIndex] = newStandard.trim();
-        setStandards(updated);
+        const updated = [...habits];
+        updated[editingIndex] = newHabit.trim();
+        setHabits(updated);
         setEditingIndex(null);
       } else {
-        setStandards([...standards, newStandard.trim()]);
+        if (habits.length >= 15) {
+          Alert.alert('Limit Reached', 'You can add up to 15 daily habits.');
+          return;
+        }
+        setHabits([...habits, newHabit.trim()]);
       }
-      setNewStandard('');
+      setNewHabit('');
     }
   };
 
   const startEditing = (index: number) => {
     setEditingIndex(index);
-    setNewStandard(standards[index]);
+    setNewHabit(habits[index]);
     inputRef.current?.focus();
   };
 
   const cancelEditing = () => {
     setEditingIndex(null);
-    setNewStandard('');
+    setNewHabit('');
   };
 
-  const removeStandard = (index: number) => {
+  const removeHabit = (index: number) => {
     if (editingIndex === index) {
       cancelEditing();
     }
-    setStandards(standards.filter((_, i) => i !== index));
-  };
-
-  const moveUp = (index: number) => {
-    if (index === 0) return;
-    const updated = [...standards];
-    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-    setStandards(updated);
-  };
-
-  const moveDown = (index: number) => {
-    if (index === standards.length - 1) return;
-    const updated = [...standards];
-    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-    setStandards(updated);
+    setHabits(habits.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
     try {
-      await updateJournal({ standards });
-      Alert.alert('Saved', 'Your standards have been saved.');
+      await updateJournal({ dailyHabits: habits });
+      Alert.alert('Saved', 'Your daily habits have been saved.');
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'Failed to save standards.');
+      Alert.alert('Error', 'Failed to save habits.');
     }
   };
 
@@ -91,7 +81,7 @@ export default function EditStandardsScreen({ navigation }: EditStandardsScreenP
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Standards</Text>
+        <Text style={styles.headerTitle}>Daily Habits</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -104,18 +94,17 @@ export default function EditStandardsScreen({ navigation }: EditStandardsScreenP
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.description}>
-            Define your unquestionable standards. Use arrows to reorder.
+            Track up to 15 habits you want to build. Check them off each evening in your journal.
           </Text>
 
           <View style={styles.inputContainer}>
             <TextInput
               ref={inputRef}
               style={[styles.input, editingIndex !== null && styles.inputEditing]}
-              placeholder="Enter a standard..."
+              placeholder="Enter a habit (e.g., Drink 8 glasses of water)..."
               placeholderTextColor={colors.text.tertiary}
-              value={newStandard}
-              onChangeText={setNewStandard}
-              multiline
+              value={newHabit}
+              onChangeText={setNewHabit}
               onFocus={(e) => {
                 e.target.measure((x, y, width, height, pageX, pageY) => {
                   scrollToInput(pageY);
@@ -127,52 +116,31 @@ export default function EditStandardsScreen({ navigation }: EditStandardsScreenP
                 <Ionicons name="close" size={20} color={colors.text.secondary} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={[styles.addButton, editingIndex !== null && styles.updateButton]} onPress={addStandard}>
+            <TouchableOpacity style={[styles.addButton, editingIndex !== null && styles.updateButton]} onPress={addHabit}>
               <Text style={styles.addButtonText}>{editingIndex !== null ? 'Update' : 'Add'}</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.countText}>{standards.length} standards</Text>
+          <Text style={styles.countText}>{habits.length} / 15 habits</Text>
 
           <View style={styles.listContainer}>
-            {standards.length === 0 ? (
-              <EmptyState message="No standards yet. Add your first one above!" />
+            {habits.length === 0 ? (
+              <EmptyState message="No habits yet. Add your first one above!" />
             ) : (
-              standards.map((standard, index) => (
+              habits.map((habit, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={[styles.standardCard, editingIndex === index && styles.cardEditing]}
+                  style={[styles.habitCard, editingIndex === index && styles.cardEditing]}
                   onPress={() => startEditing(index)}
                   activeOpacity={0.7}
                 >
-                  <View style={styles.reorderButtons}>
-                    <TouchableOpacity
-                      onPress={() => moveUp(index)}
-                      disabled={index === 0}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons
-                        name="chevron-up"
-                        size={20}
-                        color={index === 0 ? colors.text.light : colors.text.secondary}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => moveDown(index)}
-                      disabled={index === standards.length - 1}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons
-                        name="chevron-down"
-                        size={20}
-                        color={index === standards.length - 1 ? colors.text.light : colors.text.secondary}
-                      />
-                    </TouchableOpacity>
+                  <View style={styles.habitIconContainer}>
+                    <Ionicons name="checkbox-outline" size={20} color={colors.text.tertiary} />
                   </View>
-                  <Text style={styles.standardText}>{standard}</Text>
+                  <Text style={styles.habitText}>{habit}</Text>
                   <View style={styles.cardActions}>
                     <Ionicons name="pencil" size={16} color={colors.text.tertiary} style={styles.editIcon} />
-                    <TouchableOpacity onPress={() => removeStandard(index)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <TouchableOpacity onPress={() => removeHabit(index)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                       <Text style={styles.removeText}>✕</Text>
                     </TouchableOpacity>
                   </View>
@@ -254,7 +222,6 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     fontSize: 16,
     fontFamily: 'Quicksand_400Regular',
     color: colors.text.primary,
-    minHeight: 50,
   },
   inputEditing: {
     borderWidth: 2,
@@ -290,7 +257,7 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   },
   listContainer: {
   },
-  standardCard: {
+  habitCard: {
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
     padding: spacing.md,
@@ -307,17 +274,14 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
     borderWidth: 2,
     borderColor: colors.primary,
   },
-  reorderButtons: {
+  habitIconContainer: {
     marginRight: spacing.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  standardText: {
+  habitText: {
     flex: 1,
     fontSize: 16,
     fontFamily: 'Quicksand_400Regular',
     color: colors.text.primary,
-    lineHeight: 22,
   },
   cardActions: {
     flexDirection: 'row',

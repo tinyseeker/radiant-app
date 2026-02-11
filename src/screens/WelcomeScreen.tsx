@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/types';
 import { spacing, borderRadius, typography } from '../theme/colors';
 import { useJournal } from '../context/JournalContext';
@@ -14,6 +15,7 @@ type WelcomeScreenProps = {
 export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   const { journal } = useJournal();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const styles = createStyles(colors);
@@ -43,7 +45,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   return (
     <LinearGradient
       colors={colors.gradients.background}
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 60 }]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
@@ -97,7 +99,6 @@ const createStyles = (colors: typeof import('../theme/colors').lightColors) => S
   container: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingVertical: 60,
     justifyContent: 'space-between',
   },
   content: {

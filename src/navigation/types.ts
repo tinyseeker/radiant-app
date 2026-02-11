@@ -4,6 +4,12 @@ export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: undefined;
   Home: undefined;
+  JournalHome: undefined;
+  JournalReview: undefined;
+  DailyEntry: { section?: 'gratitude' | 'evening'; date?: string };
+  Affirmations: undefined;
+  AffirmationLoop: { affirmations: string[]; duration: number };
+  VisionBoard: undefined;
   EditAffirmations: undefined;
   EditMorningRoutine: undefined;
   EditEveningRoutine: undefined;
@@ -11,9 +17,10 @@ export type RootStackParamList = {
   EditTraits: undefined;
   EditStandards: undefined;
   EditReminders: undefined;
-  EditVisionBoard: undefined;
+  EditDailyHabits: undefined;
+  EditVisionBoard: { category?: 'roleModels' | 'lifestyle' | 'bodyGoals' | 'successSymbols' | 'inspiration' };
   ViewJournal: undefined;
-  DailyCheckIn: undefined;
   VisionBoardSlideshow: undefined;
   Settings: undefined;
+  StreakHistory: undefined;
 };

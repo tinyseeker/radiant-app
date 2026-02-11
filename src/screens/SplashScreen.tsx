@@ -1,85 +1,123 @@
-import React, { useEffect } from 'react';
-import { Text, StyleSheet, Image, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ImageBackground, Animated, Dimensions, View, Text } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
-import { typography } from '../theme/colors';
 
 type SplashScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Splash'>;
 };
 
+const { width, height } = Dimensions.get('window');
+
+const INSPIRATIONAL_QUOTES = [
+  "You are capable of amazing things.",
+  "Today is a new beginning.",
+  "Your potential is limitless.",
+  "Believe in your journey.",
+  "You deserve happiness and peace.",
+  "Every day is a chance to grow.",
+  "You are stronger than you think.",
+  "Embrace the light within you.",
+  "Your story is just beginning.",
+  "Radiate positivity today.",
+];
+
 export default function SplashScreen({ navigation }: SplashScreenProps) {
   const fadeAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(0.3);
+  const quoteFadeAnim = new Animated.Value(0);
+  const [quote] = useState(() =>
+    INSPIRATIONAL_QUOTES[Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length)]
+  );
 
   useEffect(() => {
-    // Parallel animations for logo: fade in + scale up
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
+    // Fade in background
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+
+    // Fade in quote after a short delay
+    const quoteTimer = setTimeout(() => {
+      Animated.timing(quoteFadeAnim, {
         toValue: 1,
-        duration: 800,
+        duration: 1000,
         useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-    ]).start();
+      }).start();
+    }, 600);
 
     // Navigate to Welcome after 3 seconds
     const timer = setTimeout(() => {
       navigation.replace('Welcome');
     }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(quoteTimer);
+    };
   }, []);
 
   return (
-    <LinearGradient
-      colors={['#FF9A76', '#FF6B9D']}
-      style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      <Animated.View style={[styles.logoContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-        <Image
-          source={require('../../assets/phoenix - transparent.png')}
-          style={styles.phoenixIcon}
-          resizeMode="contain"
-        />
-      </Animated.View>
-
-      <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
-        Radiant
-      </Animated.Text>
-    </LinearGradient>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      <ImageBackground
+        source={require('../../assets/Load Screen.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.quoteContainer}>
+          <Animated.Text style={[styles.quote, { opacity: quoteFadeAnim }]}>
+            {quote}
+          </Animated.Text>
+        </View>
+        <Text style={styles.brandName}>Radiant</Text>
+      </ImageBackground>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1a1a2e',
+  },
+  backgroundImage: {
+    flex: 1,
+    width: width,
+    height: height,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoContainer: {
+  quoteContainer: {
+    position: 'absolute',
+    top: 110,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 40,
   },
-  phoenixIcon: {
-    width: 150,
-    height: 150,
-  },
-  title: {
-    ...typography.h1,
-    fontSize: 18,
-    fontWeight: '700',
+  quote: {
+    fontSize: 22,
+    fontFamily: 'Quicksand_500Medium',
     color: '#FFFFFF',
-    letterSpacing: 1,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    lineHeight: 32,
+    letterSpacing: 0.3,
+  },
+  brandName: {
+    fontSize: 28,
+    fontFamily: 'CormorantGaramond_600SemiBold',
+    color: '#FFFFFF',
+    letterSpacing: 4,
+    textAlign: 'center',
     position: 'absolute',
     bottom: 60,
+    left: 0,
+    right: 0,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
